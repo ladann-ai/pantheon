@@ -143,9 +143,30 @@
             border-radius: 4px;
             border: 1px solid #2e4c2f;
         }
+        #coze-iframe-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0c;
+            z-index: 99999;
+        }
+        .close-iframe-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #1a1a24;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 100000;
+        }
     </style>
-    <!-- Подключаем официальный Web SDK от Coze -->
-    <script src="https://coze.com"></script>
 </head>
 <body>
     <div class="header-container">
@@ -157,6 +178,10 @@
         <div class="subtitle" id="main-subtitle">Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.</div>
     </div>
     <div class="grid" id="pantheon-grid"></div>
+    <div id="coze-iframe-overlay">
+        <button class="close-iframe-btn" onclick="closeChat()">← BACK TO PANTHEON</button>
+        <iframe id="coze-frame" style="width:100%; height:100%; border:none;"></iframe>
+    </div>
     <script>
         let currentLang = 'en';
         const localization = {
@@ -219,18 +244,25 @@
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="#" onclick="openWidget(event)" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="openChat(event)" class="btn">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        function openWidget(e) {
+        function openChat(e) {
             e.preventDefault();
-            // Метод SDK для автоматического открытия плавающего окна чата
-            if (window.cozeWebSDKInstance) {
-                window.cozeWebSDKInstance.openChat();
-            }
+            const overlay = document.getElementById('coze-iframe-overlay');
+            const frame = document.getElementById('coze-frame');
+            
+            // Используем официальную прямую ссылку на веб-интерфейс вашего бота
+            frame.src = "https://coze.com";
+            overlay.style.display = 'block';
+        }
+
+        function closeChat() {
+            document.getElementById('coze-iframe-overlay').style.display = 'none';
+            document.getElementById('coze-frame').src = '';
         }
 
         function switchLang(lang) {
@@ -241,26 +273,6 @@
             });
             renderGrid();
         }
-
-        // Инициализируем глобальный плавающий виджет Coze Chat без багов
-        window.cozeWebSDKInstance = new CozeWebSDK.WebChatClient({
-            config: {
-                type: 'bot',
-                bot_id: '7686437490198249525',
-                isIframe: false,
-            },
-            auth: {
-                type: 'token',
-                token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo',
-                onRefreshToken: async () => 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo'
-            },
-            userInfo: { id: 'traveler', nickname: 'Traveler' },
-            ui: {
-                base: { layout: 'mobile', lang: 'en', zIndex: 99999 },
-                footer: { isShow: false },
-                chatBot: { title: 'The Pantheon of 12 Gods', uploadable: false }
-            }
-        });
 
         renderGrid();
     </script>
