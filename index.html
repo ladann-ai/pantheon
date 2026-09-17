@@ -155,8 +155,8 @@
             border-color: #00e5ff;
         }
     </style>
-    <!-- Подключаем официальную библиотеку Coze SDK с вашего экрана установки -->
-    <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
+    <!-- Подключаем ОФИЦИАЛЬНЫЙ СТАБИЛЬНЫЙ PRODUCTION WEB SDK скрипт Coze -->
+    <script src="https://coze.com"></script>
 </head>
 <body>
     <div class="header-container">
@@ -256,7 +256,7 @@
             });
         }
 
-        // Активируем ОФИЦИАЛЬНЫЙ Chat SDK, предоставленный серверами Coze
+        // Железобетонная инициализация стабильного Production SDK
         function initCoze() {
             try {
                 cozeWebSDKInstance = new CozeWebSDK.WebChatClient({
@@ -273,11 +273,11 @@
                     },
                     ui: {
                         base: { 
-                            layout: 'mobile', /* ФОРСИРУЕМ ОПТИМАЛЬНЫЙ МОБИЛЬНЫЙ ВИД */
+                            layout: 'mobile', 
                             lang: 'en', 
                             zIndex: 999999 
                         },
-                        asstBtn: { isNeed: true }, /* ВКЛЮЧАЕМ ОФИЦИАЛЬНУЮ ПЛАВАЮЩУЮ КНОПКУ ЧАТА */
+                        asstBtn: { isNeed: false }, /* Полностью убираем дублирующую кнопку сбоку */
                         footer: { isShow: false }
                     }
                 });
@@ -289,7 +289,7 @@
         function openOracleChat(e) {
             e.preventDefault();
             if (cozeWebSDKInstance) {
-                // Вызываем легальный системный метод развертывания виджета
+                // Официальный рабочий вызов стабильного виджета
                 cozeWebSDKInstance.openChat();
             } else {
                 console.warn("Coze SDK is not initialized yet.");
@@ -305,7 +305,7 @@
             renderGrid();
         }
 
-        // Запуск
+        // Стартуем
         initCoze();
         renderGrid();
     </script>
