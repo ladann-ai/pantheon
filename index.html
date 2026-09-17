@@ -143,10 +143,6 @@
             border-radius: 4px;
             border: 1px solid #2e4c2f;
             cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .clover-badge:hover {
-            background-color: #2e4c2f;
         }
         .clover-badge.copied {
             background-color: #00e5ff;
@@ -154,7 +150,7 @@
             border-color: #00e5ff;
         }
     </style>
-    <!-- Официальная скопированная вами библиотека SDK Coze -->
+    <!-- Подключаем стабильный Production Web SDK Coze -->
     <script src="https://coze.com"></script>
 </head>
 <body>
@@ -169,14 +165,13 @@
     <div class="grid" id="pantheon-grid"></div>
     <script>
         let currentLang = 'en';
-        let cozeSDKInstance = null;
+        let cozeWebSDKInstance = null;
 
         const localization = {
             en: {
                 title: "The Pantheon of 12 Slavic Gods",
                 subtitle: "Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.",
-                btnText: "COMMUNE VIA VOICE / CALL",
-                copyText: "Click to copy",
+                btnText: "COMMUNE WITH ORACLE",
                 copiedText: "Copied!",
                 gods: [
                     { id: "lada", name: "LADA", archetype: "Mother / Balance", preview: "I am here to restore your harmony, little spark." },
@@ -195,9 +190,8 @@
             },
             ru: {
                 title: "Пантеон 12 Славянских Богов",
-                subtitle: "Найдите свой ментальный архетип силы, побеседуйте вживую голосом и заберите священный промокод для фудтраков Ladann.",
+                subtitle: "Найдите свой ментальный archetype силы, побеседуйте вживую голосом и заберите священный промокод для фудтраков Ladann.",
                 btnText: "ПОГОВОРИТЬ С ОРАКУЛОМ",
-                copyText: "Нажми, чтобы скопировать",
                 copiedText: "Скопировано!",
                 gods: [
                     { id: "lada", name: "ЛАДА", archetype: "Мать / Гармония", preview: "Твой внутренний огонёк дрожит? Восстановим лад в твоем сердце." },
@@ -231,8 +225,6 @@
                     badgeElement.innerText = originalText;
                     badgeElement.classList.remove('copied');
                 }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
             });
         }
 
@@ -240,53 +232,45 @@
             const grid = document.getElementById('pantheon-grid');
             grid.innerHTML = '';
             const langData = localization[currentLang];
-            
             document.getElementById('main-title').innerText = langData.title;
             document.getElementById('main-subtitle').innerText = langData.subtitle;
-            
             langData.gods.forEach(god => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                const codeText = `Clover: ${codes[god.id] || 'UNKNOWN'}`;
-                
                 card.innerHTML = `
-                    <div class="clover-badge" title="${langData.copyText}" onclick="copyToClipboard('${codes[god.id]}', this, '${currentLang}')">${codeText}</div>
+                    <div class="clover-badge" onclick="copyToClipboard('${codes[god.id]}', this, '${currentLang}')">Clover: ${codes[god.id]}</div>
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="#" onclick="triggerOracle(event, '${god.name}')" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="openOracleChat(event)" class="btn">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Вшиваем ПРАВИЛЬНЫЙ токен и bot_id вашего нового Оракула
-        function initCozeSDK() {
-            cozeSDKInstance = new CozeWebSDK.WebChatClient({
-                config: {
-                    bot_id: '7686486765427490821',
-                },
-                componentProps: {
-                    title: 'The Pantheon of 12 Gods',
-                },
-                auth: {
-                    type: 'token',
-                    token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo', 
-                    onRefreshToken: function () {
-                        return 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo';
-                    }
-                }
-            });
-        }
+        // Чистая инициализация стабильного SDK
+        cozeWebSDKInstance = new CozeWebSDK.WebChatClient({
+            config: {
+                bot_id: '7686486765427490821',
+                isIframe: false,
+            },
+            auth: {
+                type: 'token',
+                token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo',
+                onRefreshToken: async () => 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo'
+            },
+            userInfo: { id: 'traveler', nickname: 'Traveler' },
+            ui: {
+                base: { layout: 'mobile', lang: 'en', zIndex: 99999 },
+                asstBtn: { isNeed: false }, /* УБРАЛИ ГЛЮЧНЫЙ ЗНАЧОК С ОШИБКОЙ 404 */
+                footer: { isShow: false }
+            }
+        });
 
-        // Кристально чистый вызов окна чата без конфликтов мобильного DOM
-        function triggerOracle(e, godName) {
+        function openOracleChat(e) {
             e.preventDefault();
-            if (cozeSDKInstance) {
-                // Открываем чат-оракул
-                cozeSDKInstance.openChat();
-            } else {
-                console.error("Coze SDK not initialized");
+            if (cozeWebSDKInstance) {
+                cozeWebSDKInstance.openChat();
             }
         }
 
@@ -299,8 +283,6 @@
             renderGrid();
         }
 
-        // Инициализация системы
-        initCozeSDK();
         renderGrid();
     </script>
 </body>
