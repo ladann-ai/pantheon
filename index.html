@@ -143,6 +143,11 @@
             border-radius: 4px;
             border: 1px solid #2e4c2f;
             cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .clover-badge:hover {
+            background-color: #2e4c2f;
         }
         .clover-badge.copied {
             background-color: #00e5ff;
@@ -151,18 +156,19 @@
         }
     </style>
     <!-- Подключаем стабильный Production Web SDK Coze -->
-    <script src="https://coze.com"></script>
+    <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
 </head>
 <body>
     <div class="header-container">
         <div class="lang-switch">
-            <button class="lang-btn active" onclick="switchLang('en')">EN</button>
-            <button class="lang-btn" onclick="switchLang('ru')">RU</button>
+            <button class="lang-btn active" onclick="switchLang('en')" aria-label="Switch to English">EN</button>
+            <button class="lang-btn" onclick="switchLang('ru')" aria-label="Переключить на русский">RU</button>
         </div>
         <h1 id="main-title">The Pantheon of 12 Slavic Gods</h1>
         <div class="subtitle" id="main-subtitle">Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.</div>
     </div>
     <div class="grid" id="pantheon-grid"></div>
+
     <script>
         let currentLang = 'en';
         let cozeWebSDKInstance = null;
@@ -190,7 +196,7 @@
             },
             ru: {
                 title: "Пантеон 12 Славянских Богов",
-                subtitle: "Найдите свой ментальный archetype силы, побеседуйте вживую голосом и заберите священный промокод для фудтраков Ladann.",
+                subtitle: "Найдите свой ментальный архетип силы, побеседуйте вживую голосом и заберите священный промокод для фудтраков Ladann.",
                 btnText: "ПОГОВОРИТЬ С ОРАКУЛОМ",
                 copiedText: "Скопировано!",
                 gods: [
@@ -225,6 +231,8 @@
                     badgeElement.innerText = originalText;
                     badgeElement.classList.remove('copied');
                 }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
             });
         }
 
@@ -234,43 +242,58 @@
             const langData = localization[currentLang];
             document.getElementById('main-title').innerText = langData.title;
             document.getElementById('main-subtitle').innerText = langData.subtitle;
+            
             langData.gods.forEach(god => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <div class="clover-badge" onclick="copyToClipboard('${codes[god.id]}', this, '${currentLang}')">Clover: ${codes[god.id]}</div>
+                    <div class="clover-badge" title="Click to copy" onclick="copyToClipboard('${codes[god.id]}', this, '${currentLang}')">Clover: ${codes[god.id]}</div>
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="#" onclick="openOracleChat(event)" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="openOracleChat(event, '${god.id}')" class="btn">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Чистая инициализация стабильного SDK
-        cozeWebSDKInstance = new CozeWebSDK.WebChatClient({
-            config: {
-                bot_id: '7686486765427490821',
-                isIframe: false,
-            },
-            auth: {
-                type: 'token',
-                token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo',
-                onRefreshToken: async () => 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo'
-            },
-            userInfo: { id: 'traveler', nickname: 'Traveler' },
-            ui: {
-                base: { layout: 'mobile', lang: 'en', zIndex: 99999 },
-                asstBtn: { isNeed: false }, /* УБРАЛИ ГЛЮЧНЫЙ ЗНАЧОК С ОШИБКОЙ 404 */
-                footer: { isShow: false }
+        // Инициализация SDK
+        function initCoze() {
+            try {
+                cozeWebSDKInstance = new CozeWebSDK.WebChatClient({
+                    config: {
+                        bot_id: '7686486765427490821',
+                    },
+                    auth: {
+                        type: 'token',
+                        // ⚠️ ВНИМАНИЕ: Этот токен виден всем, кто откроет "Просмотр кода страницы".
+                        // Обязательно ограничьте его использование по домену (Allowed Origins) в настройках Coze!
+                        token: 'pat_vFLYmx7AmHkDJoyeu3W1NlytHl58bRekX0YPY3QCxzwYfwQMlYlAk4FUhfoDdPR2', 
+                        onRefreshToken: async () => 'pat_vFLYmx7AmHkDJoyeu3W1NlytHl58bRekX0YPY3QCxzwYfwQMlYlAk4FUhfoDdPR2'
+                    },
+                    userInfo: { id: 'traveler', nickname: 'Traveler' },
+                    ui: {
+                        base: { layout: 'desktop', lang: currentLang, zIndex: 99999 },
+                        asstBtn: { isNeed: false },
+                        footer: { isShow: false }
+                    }
+                });
+            } catch (error) {
+                console.error("Failed to initialize Coze SDK:", error);
             }
-        });
+        }
 
-        function openOracleChat(e) {
+        function openOracleChat(e, godId) {
             e.preventDefault();
             if (cozeWebSDKInstance) {
                 cozeWebSDKInstance.openChat();
+                
+                // Подсказка: Так как мы не отправляем имя бога автоматически через "хак", 
+                // лучше всего настроить приветственное сообщение (Opening Statement) самого бота в Coze так:
+                // "Приветствую, Путник. Назови имя бога, с которым ты желаешь говорить (например: 'ЛАДА' или 'PERUN'), 
+                // и я приму его облик."
+            } else {
+                console.warn("Coze SDK is not initialized yet.");
             }
         }
 
@@ -280,10 +303,19 @@
                 btn.classList.remove('active');
                 if(btn.innerText.toLowerCase() === lang) btn.classList.add('active');
             });
+            
+            // Обновляем язык в UI Coze, если экземпляр уже создан
+            if (cozeWebSDKInstance && cozeWebSDKInstance.updateUI) {
+                cozeWebSDKInstance.updateUI({ base: { lang: currentLang } });
+            }
+            
             renderGrid();
         }
 
+        // Запуск
+        initCoze();
         renderGrid();
     </script>
 </body>
 </html>
+        
