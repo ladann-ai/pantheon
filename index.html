@@ -154,20 +154,19 @@
             border-color: #00e5ff;
         }
     </style>
-    <!-- Подключаем официальную библиотеку SDK Coze -->
-    <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
+    <!-- Официальная скопированная вами библиотека SDK Coze -->
+    <script src="https://coze.com"></script>
 </head>
 <body>
     <div class="header-container">
         <div class="lang-switch">
-            <button class="lang-btn active" onclick="switchLang('en')" aria-label="Switch to English">EN</button>
-            <button class="lang-btn" onclick="switchLang('ru')" aria-label="Переключить на русский">RU</button>
+            <button class="lang-btn active" onclick="switchLang('en')">EN</button>
+            <button class="lang-btn" onclick="switchLang('ru')">RU</button>
         </div>
         <h1 id="main-title">The Pantheon of 12 Slavic Gods</h1>
         <div class="subtitle" id="main-subtitle">Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.</div>
     </div>
     <div class="grid" id="pantheon-grid"></div>
-
     <script>
         let currentLang = 'en';
         let cozeSDKInstance = null;
@@ -217,7 +216,6 @@
             }
         };
 
-        // Исправлена опечатка: marena -> morena
         const codes = {
             lada: "LADA_LOVE", perun: "PERUN_THUNDER", svarog: "SWAROG2026", makosh: "MAKOSH_PATH",
             chernobog: "CHERNOBOG_VOID", veles: "VELES_SHAPE", morena: "MORENA_TRANSFORM", dazhdbog: "DAZHDBOG_GIFT",
@@ -256,15 +254,14 @@
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="#" onclick="triggerOracle(event, '${god.id}')" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="triggerOracle(event, '${god.name}')" class="btn">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
+        // Вшиваем ПРАВИЛЬНЫЙ токен и bot_id вашего нового Оракула
         function initCozeSDK() {
-            // ВНИМАНИЕ: Замените 'ВАШ_ТОКЕН_ЗДЕСЬ' на реальный токен. 
-            // Никогда не публикуйте реальный токен в открытых репозиториях!
             cozeSDKInstance = new CozeWebSDK.WebChatClient({
                 config: {
                     bot_id: '7686486765427490821',
@@ -274,63 +271,23 @@
                 },
                 auth: {
                     type: 'token',
-                    token: 'ВАШ_ТОКЕН_ЗДЕСЬ', 
+                    token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo', 
                     onRefreshToken: function () {
-                        return 'ВАШ_ТОКЕН_ЗДЕСЬ';
+                        return 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo';
                     }
                 }
             });
         }
 
-        function triggerOracle(e, godId) {
+        // Кристально чистый вызов окна чата без конфликтов мобильного DOM
+        function triggerOracle(e, godName) {
             e.preventDefault();
-            if (!cozeSDKInstance) {
+            if (cozeSDKInstance) {
+                // Открываем чат-оракул
+                cozeSDKInstance.openChat();
+            } else {
                 console.error("Coze SDK not initialized");
-                return;
             }
-            
-            // Открываем чат-виджет
-            cozeSDKInstance.openChat();
-            
-            // Попытка автоматической отправки сообщения (Хак)
-            // Примечание: Если Coze рендерит чат в iframe, этот код не сработает из-за CORS.
-            // В таком случае нужно использовать официальные методы SDK для отправки начального сообщения, если они доступны.
-            setTimeout(() => {
-                try {
-                    // Пытаемся найти поле ввода (может отличаться в зависимости от версии SDK)
-                    const cozeInput = document.querySelector('.coze-chat-input-textarea') || 
-                                      document.querySelector('textarea[placeholder*="message" i]') || 
-                                      document.querySelector('textarea');
-                    
-                    if (cozeInput) {
-                        // Симулируем фокус и ввод
-                        cozeInput.focus();
-                        const message = currentLang === 'ru' 
-                            ? `Активируй архетип: ${godId.toUpperCase()}.` 
-                            : `Channeling energy: ${godId.toUpperCase()}. Activate this persona now.`;
-                        
-                        // Используем setValue или нативный dispatchEvent для триггера React/Vue событий
-                        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-                        nativeInputValueSetter.call(cozeInput, message);
-                        cozeInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-                        // Пытаемся найти кнопку отправки
-                        const sendBtn = document.querySelector('.coze-chat-send-button') || 
-                                        document.querySelector('button[type="submit"]') ||
-                                        document.querySelector('button[aria-label*="send" i]');
-                        
-                        if (sendBtn) {
-                            sendBtn.click();
-                        } else {
-                            console.warn("Send button not found. User may need to press Enter manually.");
-                        }
-                    } else {
-                        console.warn("Chat input not found in DOM. Coze may be using an iframe.");
-                    }
-                } catch (err) {
-                    console.error("Error automating Coze message:", err);
-                }
-            }, 1000); // Увеличил таймаут до 1000мс для надежности рендеринга виджета
         }
 
         function switchLang(lang) {
@@ -342,7 +299,7 @@
             renderGrid();
         }
 
-        // Инициализация
+        // Инициализация системы
         initCozeSDK();
         renderGrid();
     </script>
