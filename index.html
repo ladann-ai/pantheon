@@ -154,9 +154,34 @@
             color: #000;
             border-color: #00e5ff;
         }
+        /* Принудительный полноэкранный контейнер для мобильного рендеринга Coze */
+        #coze-fullscreen-wrapper {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0a0a0c;
+            z-index: 999999;
+        }
+        .back-to-pantheon-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #1a1a24;
+            border: 1px solid #333;
+            color: #00e5ff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+            z-index: 1000000;
+        }
     </style>
-    <!-- Подключаем стабильный Production Web SDK Coze -->
-    <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
+    <!-- Официальный Production Web SDK Coze высокой стабильности -->
+    <script src="https://coze.com"></script>
 </head>
 <body>
     <div class="header-container">
@@ -169,6 +194,10 @@
     </div>
     <div class="grid" id="pantheon-grid"></div>
 
+    <div id="coze-fullscreen-wrapper">
+        <button class="back-to-pantheon-btn" onclick="closeOracleChat()">← BACK TO PANTHEON</button>
+        <div id="coze-mount-point" style="width:100%; height:100%;"></div>
+    </div>
     <script>
         let currentLang = 'en';
         let cozeWebSDKInstance = null;
@@ -251,50 +280,45 @@
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="#" onclick="openOracleChat(event, '${god.id}')" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="openOracleChat(event, '${god.name}')" class="btn">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Инициализация SDK
-        function initCoze() {
-            try {
-                cozeWebSDKInstance = new CozeWebSDK.WebChatClient({
-                    config: {
-                        bot_id: '7686486765427490821',
-                    },
-                    auth: {
-                        type: 'token',
-                        // ⚠️ ВНИМАНИЕ: Этот токен виден всем, кто откроет "Просмотр кода страницы".
-                        // Обязательно ограничьте его использование по домену (Allowed Origins) в настройках Coze!
-                        token: 'pat_vFLYmx7AmHkDJoyeu3W1NlytHl58bRekX0YPY3QCxzwYfwQMlYlAk4FUhfoDdPR2', 
-                        onRefreshToken: async () => 'pat_vFLYmx7AmHkDJoyeu3W1NlytHl58bRekX0YPY3QCxzwYfwQMlYlAk4FUhfoDdPR2'
-                    },
-                    userInfo: { id: 'traveler', nickname: 'Traveler' },
-                    ui: {
-                        base: { layout: 'desktop', lang: currentLang, zIndex: 99999 },
-                        asstBtn: { isNeed: false },
-                        footer: { isShow: false }
+        function openOracleChat(e, godName) {
+            e.preventDefault();
+            document.getElementById('coze-fullscreen-wrapper').style.display = 'block';
+            document.getElementById('coze-mount-point').innerHTML = '';
+            
+            // Нативная и стабильная сборка SDK для мобильных экранов
+            cozeWebSDKInstance = new CozeWebSDK.WebChatClient({
+                config: {
+                    bot_id: '7686486765427490821',
+                    isIframe: true
+                },
+                auth: {
+                    type: 'token',
+                    token: 'pat_vFLYmx7AmHkDJoyeu3W1NlytHl58bRekX0YPY3QCxzwYfwQMlYlAk4FUhfoDdPR2', 
+                    onRefreshToken: async () => 'pat_vFLYmx7AmHkDJoyeu3W1NlytHl58bRekX0YPY3QCxzwYfwQMlYlAk4FUhfoDdPR2'
+                },
+                userInfo: { id: 'traveler', nickname: 'Traveler' },
+                ui: {
+                    base: { layout: 'mobile', lang: 'en', zIndex: 999999 },
+                    asstBtn: { isNeed: false },
+                    footer: { isShow: false },
+                    chatBot: {
+                        uploadable: false,
+                        title: godName,
+                        el: document.getElementById('coze-mount-point')
                     }
-                });
-            } catch (error) {
-                console.error("Failed to initialize Coze SDK:", error);
-            }
+                }
+            });
         }
 
-        function openOracleChat(e, godId) {
-            e.preventDefault();
-            if (cozeWebSDKInstance) {
-                cozeWebSDKInstance.openChat();
-                
-                // Подсказка: Так как мы не отправляем имя бога автоматически через "хак", 
-                // лучше всего настроить приветственное сообщение (Opening Statement) самого бота в Coze так:
-                // "Приветствую, Путник. Назови имя бога, с которым ты желаешь говорить (например: 'ЛАДА' или 'PERUN'), 
-                // и я приму его облик."
-            } else {
-                console.warn("Coze SDK is not initialized yet.");
-            }
+        function closeOracleChat() {
+            document.getElementById('coze-fullscreen-wrapper').style.display = 'none';
+            document.getElementById('coze-mount-point').innerHTML = '';
         }
 
         function switchLang(lang) {
@@ -303,19 +327,10 @@
                 btn.classList.remove('active');
                 if(btn.innerText.toLowerCase() === lang) btn.classList.add('active');
             });
-            
-            // Обновляем язык в UI Coze, если экземпляр уже создан
-            if (cozeWebSDKInstance && cozeWebSDKInstance.updateUI) {
-                cozeWebSDKInstance.updateUI({ base: { lang: currentLang } });
-            }
-            
             renderGrid();
         }
 
-        // Запуск
-        initCoze();
         renderGrid();
     </script>
 </body>
 </html>
-        
