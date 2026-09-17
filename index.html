@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -132,6 +132,10 @@
             border-color: var(--neon-blue);
             box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
         }
+        .btn.btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .clover-badge {
             position: absolute;
             top: 15px;
@@ -155,8 +159,10 @@
             border-color: #00e5ff;
         }
     </style>
-    <!-- Подключаем официальную библиотеку Coze SDK с вашего экрана установки -->
-    <script src="https://coze.com"></script>
+    <!-- FIX #1: this used to be <script src="https://coze.com"></script>, which is just the
+         Coze homepage, not a JS file -- CozeWebSDK was never defined and the chat button was dead.
+         Corrected to the real SDK URL from the official install snippet. -->
+    <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
 </head>
 <body>
     <div class="header-container">
@@ -171,6 +177,7 @@
     <script>
         let currentLang = 'en';
         let cozeWebSDKInstance = null;
+        let cozeInitFailed = false;
 
         const localization = {
             en: {
@@ -178,6 +185,7 @@
                 subtitle: "Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.",
                 btnText: "COMMUNE WITH ORACLE",
                 copiedText: "Copied!",
+                oracleUnavailable: "Oracle is temporarily unavailable. Please try again later.",
                 gods: [
                     { id: "lada", name: "LADA", archetype: "Mother / Balance", preview: "I am here to restore your harmony, little spark." },
                     { id: "perun", name: "PERUN", archetype: "Warrior / Boundaries", preview: "Break your chains. Ignite your will!" },
@@ -198,6 +206,7 @@
                 subtitle: "Найдите свой ментальный archetype силы, побеседуйте вживую голосом и заберите священный промокод для фудтраков Ladann.",
                 btnText: "ПОГОВОРИТЬ С ОРАКУЛОМ",
                 copiedText: "Скопировано!",
+                oracleUnavailable: "Оракул временно недоступен. Попробуйте позже.",
                 gods: [
                     { id: "lada", name: "ЛАДА", archetype: "Мать / Гармония", preview: "Твой внутренний огонёк дрожит? Восстановим лад в твоем сердце." },
                     { id: "perun", name: "ПЕРУН", archetype: "Воин / Границы", preview: "Скипетр сковал меня, но я разбил цепи. Разбей страхи!" },
@@ -241,7 +250,7 @@
             const langData = localization[currentLang];
             document.getElementById('main-title').innerText = langData.title;
             document.getElementById('main-subtitle').innerText = langData.subtitle;
-            
+
             langData.gods.forEach(god => {
                 const card = document.createElement('div');
                 card.className = 'card';
@@ -250,13 +259,22 @@
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="#" onclick="openOracleChat(event)" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="openOracleChat(event)" class="btn${cozeInitFailed ? ' btn-disabled' : ''}">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Активируем ОФИЦИАЛЬНЫЙ Chat SDK, предоставленный серверами Coze
+        // Activate the official Coze Chat SDK.
+        //
+        // FIX #2 (SECURITY): the original file hardcoded a real, live Personal Access Token
+        // directly in this client-side script. Anyone who viewed the page source could copy it
+        // and call the Coze API as you. That token should be treated as compromised -- rotate
+        // it in your Coze dashboard, then paste the NEW token below. Do not commit or publish
+        // a real PAT in client-side code; if possible, proxy the chat session through your own
+        // backend instead so the token never reaches the browser at all.
+        const COZE_PAT_TOKEN = 'PASTE_YOUR_NEW_ROTATED_TOKEN_HERE';
+
         function initCoze() {
             try {
                 cozeWebSDKInstance = new CozeWebSDK.WebChatClient({
@@ -268,36 +286,45 @@
                     },
                     auth: {
                         type: 'token',
-                        token: 'pat_vFLYmx7AmHkDJoyeu3W1NlytHl58bRekX0YPY3QCxzwYfwQMlYlAk4FUhfoDdPR2', 
-                        onRefreshToken: async () => 'pat_vFLYmx7AmHkDJoyeu3W1NlytHl58bRekX0YPY3QCxzwYfwQMlYlAk4FUhfoDdPR2'
+                        token: COZE_PAT_TOKEN,
+                        onRefreshToken: async () => COZE_PAT_TOKEN
                     },
                     ui: {
-                        base: { 
-                            layout: 'mobile', /* ФОРСИРУЕМ ОПТИМАЛЬНЫЙ МОБИЛЬНЫЙ ВИД */
-                            lang: 'en', 
-                            zIndex: 999999 
+                        base: {
+                            layout: 'mobile', /* NOTE: this forces the mobile widget layout on ALL
+                                                  devices, including desktop. Confirm that's what you
+                                                  want -- change to 'pc' or omit to let it adapt. */
+                            lang: 'en',
+                            zIndex: 999999
                         },
-                        asstBtn: { isNeed: true }, /* ВКЛЮЧАЕМ ОФИЦИАЛЬНУЮ ПЛАВАЮЩУЮ КНОПКУ ЧАТА */
+                        asstBtn: { isNeed: true },
                         footer: { isShow: false }
                     }
                 });
             } catch (error) {
                 console.error("Failed to initialize Coze SDK:", error);
+                cozeInitFailed = true;
+                renderGrid(); // re-render so buttons reflect the failed state
             }
         }
 
         function openOracleChat(e) {
             e.preventDefault();
             if (cozeWebSDKInstance) {
-                // Вызываем легальный системный метод развертывания виджета
                 cozeWebSDKInstance.openChat();
             } else {
+                // FIX #4 (UX): previously this only logged a console warning, so a visitor
+                // clicking the button with a broken/unloaded SDK saw nothing happen at all.
                 console.warn("Coze SDK is not initialized yet.");
+                alert(localization[currentLang].oracleUnavailable);
             }
         }
 
         function switchLang(lang) {
             currentLang = lang;
+            // FIX #3 (accessibility): keep the <html lang="..."> attribute in sync so screen
+            // readers announce the right language instead of always reading it as English.
+            document.getElementById('html-root').setAttribute('lang', lang);
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if(btn.innerText.toLowerCase() === lang) btn.classList.add('active');
@@ -305,7 +332,6 @@
             renderGrid();
         }
 
-        // Запуск
         initCoze();
         renderGrid();
     </script>
