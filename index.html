@@ -144,8 +144,8 @@
             border: 1px solid #2e4c2f;
         }
     </style>
-    <!-- Подключаем официальное ядро Web SDK от Coze -->
-    <script src="https://coze.com"></script>
+    <!-- Подключаем официальную библиотеку SDK Coze, которую вы скопировали -->
+    <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
 </head>
 <body>
     <div class="header-container">
@@ -163,7 +163,7 @@
             en: {
                 title: "The Pantheon of 12 Slavic Gods",
                 subtitle: "Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.",
-                btnText: "COMMUNE WITH ORACLE",
+                btnText: "COMMUNE VIA VOICE / CALL",
                 gods: [
                     { id: "lada", name: "LADA", archetype: "Mother / Balance", preview: "I am here to restore your harmony, little spark." },
                     { id: "perun", name: "PERUN", archetype: "Warrior / Boundaries", preview: "Break your chains. Ignite your will!" },
@@ -219,36 +219,45 @@
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="#" onclick="toggleCozeChat(event)" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="triggerOracle(event, '${god.name}')" class="btn">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Инициализируем полностью стабильный веб-клиент Coze SDK
-        let cozeWebSDKInstance = new CozeWebSDK.WebChatClient({
+        // Инициализируем ваш официальный Web SDK для 12 богов
+        let cozeSDKInstance = new CozeWebSDK.WebChatClient({
             config: {
-                type: 'bot',
-                bot_id: '7686437490198249525',
-                isIframe: false,
+                bot_id: '7686486765427490821',
+            },
+            componentProps: {
+                title: 'The Pantheon of 12 Gods',
             },
             auth: {
                 type: 'token',
                 token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo',
-                onRefreshToken: async () => 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo'
-            },
-            userInfo: { id: 'traveler', nickname: 'Traveler' },
-            ui: {
-                base: { layout: 'mobile', lang: 'en', zIndex: 99999 },
-                footer: { isShow: false },
-                chatBot: { title: 'The Pantheon of 12 Gods', uploadable: false }
+                onRefreshToken: function () {
+                    return 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo'
+                }
             }
         });
 
-        function toggleCozeChat(e) {
+        // Функция при нажатии на карточку любого бога
+        function triggerOracle(e, godName) {
             e.preventDefault();
-            if (cozeWebSDKInstance) {
-                cozeWebSDKInstance.openChat();
+            if (cozeSDKInstance) {
+                // Открываем чат-виджет
+                cozeSDKInstance.openChat();
+                
+                // Передаем скрытую команду ИИ для автоматического переключения личности бога
+                setTimeout(() => {
+                    const cozeInput = document.querySelector('.coze-chat-input-textarea') || document.querySelector('textarea');
+                    if (cozeInput) {
+                        cozeInput.value = `Channeling energy: ${godName}. Activate this persona now.`;
+                        const sendBtn = document.querySelector('.coze-chat-send-button') || document.querySelector('button[type="submit"]');
+                        if (sendBtn) sendBtn.click();
+                    }
+                }, 800);
             }
         }
 
