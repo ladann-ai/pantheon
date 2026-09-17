@@ -144,7 +144,7 @@
             border: 1px solid #2e4c2f;
         }
     </style>
-    <!-- Подключаем официальный, стабильный Web SDK от Coze -->
+    <!-- Подключаем официальное ядро Web SDK от Coze -->
     <script src="https://coze.com"></script>
 </head>
 <body>
@@ -219,37 +219,37 @@
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="#" onclick="openCozeChat(event)" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="toggleCozeChat(event)" class="btn">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Вызываем официальный чат-виджет Coze через SDK
-        let cozeClient = null;
-        function openCozeChat(e) {
-            e.preventDefault();
-            if (!cozeClient) {
-                cozeClient = new CozeWebSDK.WebChatClient({
-                    config: {
-                        type: 'bot',
-                        bot_id: '7686437490198249525',
-                        isIframe: false,
-                    },
-                    auth: {
-                        type: 'token',
-                        token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo',
-                        onRefreshToken: async () => 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo'
-                    },
-                    userInfo: { id: 'traveler', nickname: 'Traveler' },
-                    ui: {
-                        base: { layout: 'mobile', lang: currentLang === 'ru' ? 'zh-CN' : 'en', zIndex: 99999 },
-                        footer: { isShow: false },
-                        chatBot: { title: 'The Pantheon of 12 Gods', uploadable: false }
-                    }
-                });
+        // Инициализируем полностью стабильный веб-клиент Coze SDK
+        let cozeWebSDKInstance = new CozeWebSDK.WebChatClient({
+            config: {
+                type: 'bot',
+                bot_id: '7686437490198249525',
+                isIframe: false,
+            },
+            auth: {
+                type: 'token',
+                token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo',
+                onRefreshToken: async () => 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo'
+            },
+            userInfo: { id: 'traveler', nickname: 'Traveler' },
+            ui: {
+                base: { layout: 'mobile', lang: 'en', zIndex: 99999 },
+                footer: { isShow: false },
+                chatBot: { title: 'The Pantheon of 12 Gods', uploadable: false }
             }
-            cozeClient.openChat();
+        });
+
+        function toggleCozeChat(e) {
+            e.preventDefault();
+            if (cozeWebSDKInstance) {
+                cozeWebSDKInstance.openChat();
+            }
         }
 
         function switchLang(lang) {
