@@ -142,28 +142,43 @@
             padding: 4px 8px;
             border-radius: 4px;
             border: 1px solid #2e4c2f;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .clover-badge:hover {
+            background-color: #2e4c2f;
+        }
+        .clover-badge.copied {
+            background-color: #00e5ff;
+            color: #000;
+            border-color: #00e5ff;
         }
     </style>
-    <!-- Подключаем официальную библиотеку SDK Coze, которую вы скопировали -->
+    <!-- Подключаем официальную библиотеку SDK Coze -->
     <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.6/libs/oversea/index.js"></script>
 </head>
 <body>
     <div class="header-container">
         <div class="lang-switch">
-            <button class="lang-btn active" onclick="switchLang('en')">EN</button>
-            <button class="lang-btn" onclick="switchLang('ru')">RU</button>
+            <button class="lang-btn active" onclick="switchLang('en')" aria-label="Switch to English">EN</button>
+            <button class="lang-btn" onclick="switchLang('ru')" aria-label="Переключить на русский">RU</button>
         </div>
         <h1 id="main-title">The Pantheon of 12 Slavic Gods</h1>
         <div class="subtitle" id="main-subtitle">Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.</div>
     </div>
     <div class="grid" id="pantheon-grid"></div>
+
     <script>
         let currentLang = 'en';
+        let cozeSDKInstance = null;
+
         const localization = {
             en: {
                 title: "The Pantheon of 12 Slavic Gods",
                 subtitle: "Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.",
                 btnText: "COMMUNE VIA VOICE / CALL",
+                copyText: "Click to copy",
+                copiedText: "Copied!",
                 gods: [
                     { id: "lada", name: "LADA", archetype: "Mother / Balance", preview: "I am here to restore your harmony, little spark." },
                     { id: "perun", name: "PERUN", archetype: "Warrior / Boundaries", preview: "Break your chains. Ignite your will!" },
@@ -180,12 +195,14 @@
                 ]
             },
             ru: {
-                title: "Палата 12 Славянских Богов",
-                subtitle: "Найдите свой ментальный archetype силы, побеседуйте вживую голосом и заберите священный промокод для фудтраков Ladann.",
+                title: "Пантеон 12 Славянских Богов",
+                subtitle: "Найдите свой ментальный архетип силы, побеседуйте вживую голосом и заберите священный промокод для фудтраков Ladann.",
                 btnText: "ПОГОВОРИТЬ С ОРАКУЛОМ",
+                copyText: "Нажми, чтобы скопировать",
+                copiedText: "Скопировано!",
                 gods: [
                     { id: "lada", name: "ЛАДА", archetype: "Мать / Гармония", preview: "Твой внутренний огонёк дрожит? Восстановим лад в твоем сердце." },
-                    { id: "perun", name: "ПЕРУН", archetype: "Воин / Границы", preview: "Скиппер сковал меня, но я разбил цепи. Разбей страхи!" },
+                    { id: "perun", name: "ПЕРУН", archetype: "Воин / Границы", preview: "Скипетр сковал меня, но я разбил цепи. Разбей страхи!" },
                     { id: "svarog", name: "СВАРОГ", archetype: "Правитель / Творец", preview: "Хаос отступит, когда ты вернешь структуру действиям." },
                     { id: "makosh", name: "МАКОШЬ", archetype: "Мудрец / Судьба", preview: "Все оборванные нити твоей судьбы можно связать заново." },
                     { id: "chernobog", name: "ЧЕРНОБОГ", archetype: "Тень / Расчет", preview: "Кризисы неизбежны. Отключи эмоции и включи расчет." },
@@ -199,66 +216,121 @@
                 ]
             }
         };
+
+        // Исправлена опечатка: marena -> morena
         const codes = {
             lada: "LADA_LOVE", perun: "PERUN_THUNDER", svarog: "SWAROG2026", makosh: "MAKOSH_PATH",
-            chernobog: "CHERNOBOG_VOID", veles: "VELES_SHAPE", marena: "MORENA_TRANSFORM", dazhdbog: "DAZHDBOG_GIFT",
+            chernobog: "CHERNOBOG_VOID", veles: "VELES_SHAPE", morena: "MORENA_TRANSFORM", dazhdbog: "DAZHDBOG_GIFT",
             zhiva: "ZHIVA_SPRING", kolyada: "KOLYADA_WINTER", avsen: "AVSEN_GARDEN", stribog: "STRIBOG_STORM"
         };
+
+        function copyToClipboard(text, badgeElement, lang) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = badgeElement.innerText;
+                badgeElement.innerText = localization[lang].copiedText;
+                badgeElement.classList.add('copied');
+                setTimeout(() => {
+                    badgeElement.innerText = originalText;
+                    badgeElement.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
 
         function renderGrid() {
             const grid = document.getElementById('pantheon-grid');
             grid.innerHTML = '';
             const langData = localization[currentLang];
+            
             document.getElementById('main-title').innerText = langData.title;
             document.getElementById('main-subtitle').innerText = langData.subtitle;
+            
             langData.gods.forEach(god => {
                 const card = document.createElement('div');
                 card.className = 'card';
+                const codeText = `Clover: ${codes[god.id] || 'UNKNOWN'}`;
+                
                 card.innerHTML = `
-                    <div class="clover-badge">Clover: ${codes[god.id]}</div>
+                    <div class="clover-badge" title="${langData.copyText}" onclick="copyToClipboard('${codes[god.id]}', this, '${currentLang}')">${codeText}</div>
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="#" onclick="triggerOracle(event, '${god.name}')" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="triggerOracle(event, '${god.id}')" class="btn">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Инициализируем ваш официальный Web SDK для 12 богов
-        let cozeSDKInstance = new CozeWebSDK.WebChatClient({
-            config: {
-                bot_id: '7686486765427490821',
-            },
-            componentProps: {
-                title: 'The Pantheon of 12 Gods',
-            },
-            auth: {
-                type: 'token',
-                token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo',
-                onRefreshToken: function () {
-                    return 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo'
-                }
-            }
-        });
-
-        // Функция при нажатии на карточку любого бога
-        function triggerOracle(e, godName) {
-            e.preventDefault();
-            if (cozeSDKInstance) {
-                // Открываем чат-виджет
-                cozeSDKInstance.openChat();
-                
-                // Передаем скрытую команду ИИ для автоматического переключения личности бога
-                setTimeout(() => {
-                    const cozeInput = document.querySelector('.coze-chat-input-textarea') || document.querySelector('textarea');
-                    if (cozeInput) {
-                        cozeInput.value = `Channeling energy: ${godName}. Activate this persona now.`;
-                        const sendBtn = document.querySelector('.coze-chat-send-button') || document.querySelector('button[type="submit"]');
-                        if (sendBtn) sendBtn.click();
+        function initCozeSDK() {
+            // ВНИМАНИЕ: Замените 'ВАШ_ТОКЕН_ЗДЕСЬ' на реальный токен. 
+            // Никогда не публикуйте реальный токен в открытых репозиториях!
+            cozeSDKInstance = new CozeWebSDK.WebChatClient({
+                config: {
+                    bot_id: '7686486765427490821',
+                },
+                componentProps: {
+                    title: 'The Pantheon of 12 Gods',
+                },
+                auth: {
+                    type: 'token',
+                    token: 'ВАШ_ТОКЕН_ЗДЕСЬ', 
+                    onRefreshToken: function () {
+                        return 'ВАШ_ТОКЕН_ЗДЕСЬ';
                     }
-                }, 800);
+                }
+            });
+        }
+
+        function triggerOracle(e, godId) {
+            e.preventDefault();
+            if (!cozeSDKInstance) {
+                console.error("Coze SDK not initialized");
+                return;
             }
+            
+            // Открываем чат-виджет
+            cozeSDKInstance.openChat();
+            
+            // Попытка автоматической отправки сообщения (Хак)
+            // Примечание: Если Coze рендерит чат в iframe, этот код не сработает из-за CORS.
+            // В таком случае нужно использовать официальные методы SDK для отправки начального сообщения, если они доступны.
+            setTimeout(() => {
+                try {
+                    // Пытаемся найти поле ввода (может отличаться в зависимости от версии SDK)
+                    const cozeInput = document.querySelector('.coze-chat-input-textarea') || 
+                                      document.querySelector('textarea[placeholder*="message" i]') || 
+                                      document.querySelector('textarea');
+                    
+                    if (cozeInput) {
+                        // Симулируем фокус и ввод
+                        cozeInput.focus();
+                        const message = currentLang === 'ru' 
+                            ? `Активируй архетип: ${godId.toUpperCase()}.` 
+                            : `Channeling energy: ${godId.toUpperCase()}. Activate this persona now.`;
+                        
+                        // Используем setValue или нативный dispatchEvent для триггера React/Vue событий
+                        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+                        nativeInputValueSetter.call(cozeInput, message);
+                        cozeInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+                        // Пытаемся найти кнопку отправки
+                        const sendBtn = document.querySelector('.coze-chat-send-button') || 
+                                        document.querySelector('button[type="submit"]') ||
+                                        document.querySelector('button[aria-label*="send" i]');
+                        
+                        if (sendBtn) {
+                            sendBtn.click();
+                        } else {
+                            console.warn("Send button not found. User may need to press Enter manually.");
+                        }
+                    } else {
+                        console.warn("Chat input not found in DOM. Coze may be using an iframe.");
+                    }
+                } catch (err) {
+                    console.error("Error automating Coze message:", err);
+                }
+            }, 1000); // Увеличил таймаут до 1000мс для надежности рендеринга виджета
         }
 
         function switchLang(lang) {
@@ -270,6 +342,8 @@
             renderGrid();
         }
 
+        // Инициализация
+        initCozeSDK();
         renderGrid();
     </script>
 </body>
