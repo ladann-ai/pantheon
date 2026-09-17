@@ -143,7 +143,31 @@
             border-radius: 4px;
             border: 1px solid #2e4c2f;
         }
+        #coze-chat-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0c;
+            z-index: 9999;
+        }
+        .close-coze-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #1a1a24;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 10000;
+        }
     </style>
+    <script src="https://coze.com"></script>
 </head>
 <body>
     <div class="header-container">
@@ -155,15 +179,12 @@
         <div class="subtitle" id="main-subtitle">Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.</div>
     </div>
     <div class="grid" id="pantheon-grid"></div>
+    <div id="coze-chat-overlay">
+        <button class="close-coze-btn" onclick="closeCozeChat()">← BACK TO PANTHEON</button>
+        <div id="coze-embed-container" style="width:100%; height:100%;"></div>
+    </div>
     <script>
         let currentLang = 'en';
-        const botLinks = {
-            lada: "https://character.ai/chat/nbJ52Emy1tBXQFMyAWlfDoEjcCaRwjBzM77xNmrqFRY",
-            perun: "https://character.ai", svarog: "https://character.ai", makosh: "https://character.ai",
-            chernobog: "https://character.ai", veles: "https://character.ai", marena: "https://character.ai",
-            dazhdbog: "https://character.ai", zhiva: "https://character.ai", kolyada: "https://character.ai",
-            avsen: "https://character.ai", stribog: "https://character.ai"
-        };
         const localization = {
             en: {
                 title: "The Pantheon of 12 Slavic Gods",
@@ -223,10 +244,38 @@
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="${botLinks[god.id]}" target="_blank" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="openCozeChat(event, '${god.name}')" class="btn">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
+        }
+        function openCozeChat(e, godName) {
+            e.preventDefault();
+            document.getElementById('coze-chat-overlay').style.display = 'block';
+            document.getElementById('coze-embed-container').innerHTML = '';
+            new CozeWebSDK.WebChatClient({
+                config: {
+                    type: 'bot',
+                    bot_id: '7686437490198249525',
+                    isIframe: true,
+                },
+                auth: {
+                    type: 'token',
+                    token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo',
+                    onRefreshToken: async () => 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo'
+                },
+                userInfo: { id: 'traveler', nickname: 'Traveler of Yav' },
+                ui: {
+                    base: { layout: 'mobile', lang: currentLang === 'ru' ? 'zh-CN' : 'en', zIndex: 1 },
+                    header: { isShow: false, isNeedClose: false },
+                    asstBtn: { isNeed: false },
+                    footer: { isShow: false },
+                    chatBot: { title: godName, uploadable: false, el: document.getElementById('coze-embed-container') }
+                }
+            });
+        }
+        function closeCozeChat() {
+            document.getElementById('coze-chat-overlay').style.display = 'none';
         }
         function switchLang(lang) {
             currentLang = lang;
