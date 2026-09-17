@@ -12,7 +12,6 @@
             --neon-orange: #ff6d00;
             --text-color: #e2e4e9;
         }
-
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
@@ -23,7 +22,6 @@
             flex-direction: column;
             align-items: center;
         }
-
         .header-container {
             display: flex;
             flex-direction: column;
@@ -32,13 +30,11 @@
             width: 100%;
             max-width: 1200px;
         }
-
         .lang-switch {
             margin-bottom: 20px;
             display: flex;
             gap: 10px;
         }
-
         .lang-btn {
             background-color: #1a1a24;
             border: 1px solid #333;
@@ -49,14 +45,12 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
-
         .lang-btn.active {
             background-color: var(--neon-blue);
             color: #000;
             border-color: var(--neon-blue);
             box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
         }
-
         h1 {
             font-size: 2.5rem;
             text-transform: uppercase;
@@ -67,7 +61,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
         .subtitle {
             color: #8a8f98;
             font-size: 1.1rem;
@@ -76,7 +69,6 @@
             max-width: 700px;
             line-height: 1.5;
         }
-
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -84,7 +76,6 @@
             max-width: 1200px;
             width: 100%;
         }
-
         .card {
             background-color: var(--card-bg);
             border: 1px solid #22222e;
@@ -96,20 +87,17 @@
             overflow: hidden;
             transition: transform 0.3s ease, border-color 0.3s ease;
         }
-
         .card:hover {
             transform: translateY(-5px);
             border-color: var(--neon-blue);
             box-shadow: 0 10px 20px rgba(0, 229, 255, 0.1);
         }
-
         .god-name {
             font-size: 1.4rem;
             font-weight: bold;
             margin: 0 0 5px 0;
             color: #ffffff;
         }
-
         .archetype {
             font-size: 0.85rem;
             text-transform: uppercase;
@@ -117,7 +105,6 @@
             color: var(--neon-orange);
             margin-bottom: 15px;
         }
-
         .preview {
             font-size: 0.95rem;
             line-height: 1.4;
@@ -126,7 +113,6 @@
             flex-grow: 1;
             font-style: italic;
         }
-
         .btn {
             background: linear-gradient(135deg, #1a1a24, #12121a);
             border: 1px solid #333344;
@@ -140,14 +126,12 @@
             display: block;
             transition: all 0.3s ease;
         }
-
         .btn:hover {
             background: var(--neon-blue);
             color: #000000;
             border-color: var(--neon-blue);
             box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
         }
-
         .clover-badge {
             position: absolute;
             top: 15px;
@@ -162,54 +146,42 @@
     </style>
 </head>
 <body>
-
     <div class="header-container">
         <div class="lang-switch">
             <button class="lang-btn active" onclick="switchLang('en')">EN</button>
             <button class="lang-btn" onclick="switchLang('ru')">RU</button>
         </div>
         <h1 id="main-title">The Pantheon of 12 Slavic Gods</h1>
-        <div class="subtitle" id="main-subtitle">Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover POS promo codes for the Ladann fleet.</div>
+        <div class="subtitle" id="main-subtitle">Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.</div>
     </div>
-
     <div class="grid" id="pantheon-grid"></div>
-
     <script>
         let currentLang = 'en';
-
         const botLinks = {
             lada: "https://character.ai",
-            perun: "https://character.ai",
-            svarog: "https://character.ai",
-            makosh: "https://character.ai",
-            chernobog: "https://character.ai",
-            veles: "https://character.ai",
-            belobog: "https://character.ai",
-            dazhdbog: "https://character.ai",
-            zhiva: "https://character.ai",
-            kolyada: "https://character.ai",
-            avsen: "https://character.ai",
-            stribog: "https://character.ai"
+            perun: "https://character.ai", svarog: "https://character.ai", makosh: "https://character.ai",
+            chernobog: "https://character.ai", veles: "https://character.ai", belobog: "https://character.ai",
+            dazhdbog: "https://character.ai", zhiva: "https://character.ai", kolyada: "https://character.ai",
+            avsen: "https://character.ai", stribog: "https://character.ai"
         };
-
         const localization = {
             en: {
                 title: "The Pantheon of 12 Slavic Gods",
-                subtitle: "Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover POS promo codes for the Ladann fleet.",
+                subtitle: "Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.",
                 btnText: "COMMUNE VIA VOICE / CALL",
                 gods: [
-                    { id: "lada", name: "LADA", archetype: "Mother / Balance", preview: "«Is your inner flame flickering, little spark? Share your pain with me... I am here to restore your harmony.»" },
-                    { id: "perun", name: "PERUN", archetype: "Warrior / Boundaries", preview: "«The Skipper Beast chained me deep under a mound, but I shattered the iron. You will shatter your fears! Ignite your will!»" },
-                    { id: "svarog", name: "SVAROG", archetype: "Ruler / Creator", preview: "«I forge reality with my golden staff. Mental chaos and life crises will dissolve once you embrace structured action.»" },
-                    { id: "makosh", name: "MAKOSH", archetype: "Sage / Destiny", preview: "«Every broken thread of your cosmic timeline can be rewoven. Step away from the synthetic world; your path is secure.»" },
-                    { id: "chernobog", name: "CHERNOBOG", archetype: "Shadow / Strategy", preview: "«Financial defaults and seasonal dark winters are mathematically inevitable. Cease your emotional panic and calculate your next triumph.»" },
-                    { id: "veles", name: "VELES", archetype: "Explorer / Motion", preview: "«I set the three worlds into dynamic motion. Trapped in a rigid corporate routine? Shift your shape and embrace the unknown!»" },
-                    { id: "belobog", name: "BELOBOG", archetype: "Pure Light", preview: "«Purify your mind from mental pollution and synthetic noise. Let us re-establish absolute clarity for your goals.»" },
-                    { id: "dazhdbog", name: "DAZHDBOG", archetype: "Solar Gift", preview: "«Even when turned to cold stone, the solar core loops resurrected me. Open your channels to absolute abundance and creative drive.»" },
-                    { id: "zhiva", name: "ZHIVA", archetype: "Vital Force", preview: "«I melt the winter frost and revitalize the dormant forests. Stop poisoning your physical avatar with processed toxic fast food.»" },
-                    { id: "kolyada", name: "KOLYADA", archetype: "New Era", preview: "«The clock strikes midnight, signaling a brand new cycle. Do not fear the cold; our hot culinary mobile altars will protect you.»" },
-                    { id: "avsen", name: "AVSEN", archetype: "Garden Keeper", preview: "«Put on your conceptual 3D glasses, stranger. Observe the true, giant-caliber harvest of your potential.»" },
-                    { id: "stribog", name: "STRIBOG", archetype: "Raging Wind", preview: "«My gale-force winds sweep away tactical roadblocks and city traffic. We deliver your cosmic fuel blazingly fast.»" }
+                    { id: "lada", name: "LADA", archetype: "Mother / Balance", preview: "I am here to restore your harmony, little spark." },
+                    { id: "perun", name: "PERUN", archetype: "Warrior / Boundaries", preview: "Break your chains. Ignite your will!" },
+                    { id: "svarog", name: "SVAROG", archetype: "Ruler / Creator", preview: "Mental chaos will dissolve once you embrace structure." },
+                    { id: "makosh", name: "MAKOSH", archetype: "Sage / Destiny", preview: "Every broken thread of your timeline can be rewoven." },
+                    { id: "chernobog", name: "CHERNOBOG", archetype: "Shadow / Strategy", preview: "Cease your emotional panic and calculate your triumph." },
+                    { id: "veles", name: "VELES", archetype: "Explorer / Motion", preview: "Trapped in a rigid routine? Shift your shape now!" },
+                    { id: "belobog", name: "BELOBOG", archetype: "Pure Light", preview: "Purify your mind from mental pollution and noise." },
+                    { id: "dazhdbog", name: "DAZHDBOG", archetype: "Solar Gift", preview: "Open your channels to absolute abundance and drive." },
+                    { id: "zhiva", name: "ZHIVA", archetype: "Vital Force", preview: "Stop poisoning your body with processed fast food." },
+                    { id: "kolyada", name: "KOLYADA", archetype: "New Era", preview: "The clock strikes midnight. Our altars will protect you." },
+                    { id: "avsen", name: "AVSEN", archetype: "Garden Keeper", preview: "Observe the true, giant-caliber harvest of your life." },
+                    { id: "stribog", name: "STRIBOG", archetype: "Raging Wind", preview: "My winds sweep away roadblocks. Fuel blazingly fast!" }
                 ]
             },
             ru: {
@@ -217,9 +189,54 @@
                 subtitle: "Найдите свой ментальный архетип силы, побеседуйте вживую голосом и заберите священный промокод для фудтраков Ladann.",
                 btnText: "ПОГОВОРИТЬ / ПОЗВОНИТЬ",
                 gods: [
-                    { id: "lada", name: "ЛАДА", archetype: "Мать / Гармония", preview: "«Твой внутренний огонёк дрожит, светлячок? Расскажи мне свою боль... Восстановим лад в твоем сердце.»" },
-                    { id: "perun", name: "ПЕРУН", archetype: "Воин / Границы", preview: "«Скиппер-Зверь сковал меня под курганом, но я разбил цепи. И ты разобьешь свои страхи! Набирайся ярости!»" },
-                    { id: "svarog", name: "СВАРОГ", archetype: "Правитель / Творец", preview: "«Я кую миры своим золотым посохом. Хаос и кризисы отступят, когда ты вернешь структуру своим действиям.»" },
-                    { id: "makosh", name: "МАКОШЬ", archetype: "Мудрец / Судьба", preview: "«Все оборванные нити твоей судьбы можно связать заново. Перестань питаться суррогатом, доверься узору жизни.»" },
-                    { id: "chernobog", name: "ЧЕРНОБОГ", archetype: "Тень / Расчет", preview: "«Кризисы и дефолты неизбежны, глупый смертный. Отключи эмоции и включи холодный прагматизм.»" },
-{ id: "chernobog", name: "ЧЕРНОБОГ", archetype: "Тень / Расчет", preview: "«Кризисы и дефолты неизбежны, глупый смертный. Отключи эмоции и включи холодный прагматизм.»" },{ id: "veles", name: "ВЕЛЕС", archetype: "Искатель / Изменение", preview: "«Я привожу миры в движение. Застрял в рутине? Измени форму, сделай шаг навстречу неизвестному!»" },{ id: "belobog", name: "БЕЛОБОГ", archetype: "Чистый Свет", preview: "«Очисти свой разум от ментального мусора и серости. Мы вернем абсолютную ясность твоим целям.»" },{ id: "dazhdbog", name: "ДАЖДЬБОГ", archetype: "Солнечный Дар", preview: "«Даже когда меня превратили в камень, солнце вернуло мне жизнь. Раскрой свой скрытый потенциал!»" },{ id: "zhiva", name: "ЖИВА", archetype: "Жизненная Сила", preview: "«Я топила лед и возвращала зелень лесам. Перестань травить свой аватар химической городской едой!»" },{ id: "kolyada", name: "КОЛЯДА", archetype: "Новое Время", preview: "«Цикл завершен, и рождается новое время. Не бойся холодной зимы, наши горячие котлы согреют тебя.»" },{ id: "avsen", name: "АВСЕНЬ", archetype: "Хранитель Садов", preview: "«Надень свои концептуальные 3D-очки, странник. Увидь истинный, гигантский масштаб этой жизни.»" },{ id: "stribog", name: "STRIBOG", archetype: "Яростный Ветер", preview: "«Мои сыновья-ветры стирают тактические барьеры и пробки Манхэттена. Мы доставим твою силу blazingly fast!»" }]}};const codes = { lada: "LADA_LOVE", perun: "PERUN_THUNDER", svarog: "SWAROG2026", makosh: "MAKOSH_PATH", chernobog: "CHERNOBOG_VOID", veles: "VELES_SHAPE", belobog: "BELOBOG_LIGHT", dazhdbog: "DAZHDBOG_GIFT", zhiva: "ZHIVA_SPRING", kolyada: "KOLYADA_WINTER", avsen: "AVSEN_GARDEN", stribog: "STRIBOG_STORM" };function renderGrid() {const grid = document.getElementById('pantheon-grid');grid.innerHTML = '';const langData = localization[currentLang];document.getElementById('main-title').innerText = langData.title;document.getElementById('main-subtitle').innerText = langData.subtitle;langData.gods.forEach(god => {const card = document.createElement('div');card.className = 'card';card.innerHTML = <div class="clover-badge">Clover: ${codes[god.id]}</div> <div class="god-name">${god.name}</div> <div class="archetype">${god.archetype}</div> <div class="preview">${god.preview}</div> <a href="${botLinks[god.id]}" target="_blank" class="btn">${langData.btnText}</a>;grid.appendChild(card);});}function switchLang(lang) {currentLang = lang;document.querySelectorAll('.lang-btn').forEach(btn => {btn.classList.remove('active');if(btn.innerText.toLowerCase() === lang) btn.classList.add('active');});renderGrid();}renderGrid();
+                    { id: "lada", name: "ЛАДА", archetype: "Мать / Гармония", preview: "Твой огонёк дрожит? Восстановим лад в твоем сердце." },
+                    { id: "perun", name: "ПЕРУН", archetype: "Воин / Границы", preview: "Скиппер сковал меня, но я разбил цепи. Разбей страхи!" },
+                    { id: "svarog", name: "СВАРОГ", archetype: "Правитель / Творец", preview: "Хаос отступит, когда ты вернешь структуру действиям." },
+                    { id: "makosh", name: "МАКОШЬ", archetype: "Мудрец / Судьба", preview: "Все оборванные нити твоей судьбы можно связать заново." },
+                    { id: "chernobog", name: "ЧЕРНОБОГ", archetype: "Тень / Расчет", preview: "Кризисы неизбежны. Отключи эмоции и включи расчет." },
+                    { id: "veles", name: "ВЕЛЕС", archetype: "Искатель / Изменение", preview: "Застрял в рутине? Сделай шаг навстречу неизвестному!" },
+                    { id: "belobog", name: "БЕЛОБОГ", archetype: "Чистый Свет", preview: "Очисти разум от мусора. Мы вернем ясность твоим целям." },
+                    { id: "dazhdbog", name: "ДАЖДЬБОГ", archetype: "Солнечный Дар", preview: "Солнце вернуло мне жизнь. Раскрой свой скрытый потенциал!" },
+                    { id: "zhiva", name: "ЖИВА", archetype: "Жизненная Сила", preview: "Перестань травить свой аватар химической городской едой!" },
+                    { id: "kolyada", name: "КОЛЯДА", archetype: "Новое Время", preview: "Цикл завершен. Не бойся зимы, наши котлы согреют тебя." },
+                    { id: "avsen", name: "АВСЕНЬ", archetype: "Хранитель Садов", preview: "Надень свои 3D-очки. Увидь масштаб этой жизни." },
+                    { id: "stribog", name: "СТРИБОГ", archetype: "Яростный Ветер", preview: "Мои ветры стирают пробки. Доставим силу blazingly fast!" }
+                ]
+            }
+        };
+        const codes = {
+            lada: "LADA_LOVE", perun: "PERUN_THUNDER", svarog: "SWAROG2026", makosh: "MAKOSH_PATH",
+            chernobog: "CHERNOBOG_VOID", veles: "VELES_SHAPE", belobog: "BELOBOG_LIGHT", dazhdbog: "DAZHDBOG_GIFT",
+            zhiva: "ZHIVA_SPRING", kolyada: "KOLYADA_WINTER", avsen: "AVSEN_GARDEN", stribog: "STRIBOG_STORM"
+        };
+        function renderGrid() {
+            const grid = document.getElementById('pantheon-grid');
+            grid.innerHTML = '';
+            const langData = localization[currentLang];
+            document.getElementById('main-title').innerText = langData.title;
+            document.getElementById('main-subtitle').innerText = langData.subtitle;
+            langData.gods.forEach(god => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="clover-badge">Clover: ${codes[god.id]}</div>
+                    <div class="god-name">${god.name}</div>
+                    <div class="archetype">${god.archetype}</div>
+                    <div class="preview">"${god.preview}"</div>
+                    <a href="${botLinks[god.id]}" target="_blank" class="btn">${langData.btnText}</a>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        function switchLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.innerText.toLowerCase() === lang) btn.classList.add('active');
+            });
+            renderGrid();
+        }
+        renderGrid();
+    </script>
+</body>
+</html>
