@@ -143,30 +143,9 @@
             border-radius: 4px;
             border: 1px solid #2e4c2f;
         }
-        #coze-iframe-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a0c;
-            z-index: 99999;
-        }
-        .close-iframe-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #1a1a24;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 100000;
-        }
     </style>
+    <!-- Подключаем официальный, стабильный Web SDK от Coze -->
+    <script src="https://coze.com"></script>
 </head>
 <body>
     <div class="header-container">
@@ -178,36 +157,32 @@
         <div class="subtitle" id="main-subtitle">Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.</div>
     </div>
     <div class="grid" id="pantheon-grid"></div>
-    <div id="coze-iframe-overlay">
-        <button class="close-iframe-btn" onclick="closeChat()">← BACK TO PANTHEON</button>
-        <iframe id="coze-frame" style="width:100%; height:100%; border:none;"></iframe>
-    </div>
     <script>
         let currentLang = 'en';
         const localization = {
             en: {
                 title: "The Pantheon of 12 Slavic Gods",
                 subtitle: "Find your psychological archetype of power, converse live via voice AI, and unlock your sacred Clover codes for the Ladann fleet.",
-                btnText: "ACTIVATE ORACLE CHAT",
+                btnText: "COMMUNE WITH ORACLE",
                 gods: [
                     { id: "lada", name: "LADA", archetype: "Mother / Balance", preview: "I am here to restore your harmony, little spark." },
                     { id: "perun", name: "PERUN", archetype: "Warrior / Boundaries", preview: "Break your chains. Ignite your will!" },
-                    { id: "svarog", name: "SVAROG", archetype: "Ruler / Creator", preview: "Mental chaos will dissolve once you embrace structure." },
-                    { id: "makosh", name: "MAKOSH", archetype: "Sage / Destiny", preview: "Every broken thread of your timeline can be rewoven." },
-                    { id: "chernobog", name: "CHERNOBOG", archetype: "Shadow / Strategy", preview: "Cease your emotional panic and calculate your triumph." },
-                    { id: "veles", name: "VELES", archetype: "Explorer / Motion", preview: "Trapped in a rigid routine? Shift your shape now!" },
+                    { id: "svarog", name: "SVAROG", archetype: "Ruler / Creator", preview: "Mental chaos will dissolve once you embrace structured action." },
+                    { id: "makosh", name: "MAKOSH", archetype: "Sage / Destiny", preview: "Every broken thread of your cosmic timeline can be rewoven." },
+                    { id: "chernobog", name: "CHERNOBOG", archetype: "Shadow / Strategy", preview: "Cease your emotional panic and calculate your next triumph." },
+                    { id: "veles", name: "VELES", archetype: "Explorer / Motion", preview: "Trapped in a rigid routine? Shift your shape and embrace the unknown!" },
                     { id: "marena", name: "MORENA", archetype: "Transformation / Letting Go", preview: "Do not fear the dark winter of life. Release what is dead to grow." },
-                    { id: "dazhdbog", name: "DAZHDBOG", archetype: "Solar Gift", preview: "Open your channels to absolute abundance and drive." },
-                    { id: "zhiva", name: "ZHIVA", archetype: "Vital Force", preview: "Stop poisoning your body with processed fast food." },
-                    { id: "kolyada", name: "KOLYADA", archetype: "New Era", preview: "The clock strikes midnight. Our altars will protect you." },
-                    { id: "avsen", name: "AVSEN", archetype: "Garden Keeper", preview: "Observe the true, giant-caliber harvest of your life." },
+                    { id: "dazhdbog", name: "DAZHDBOG", archetype: "Solar Gift", preview: "Open your channels to absolute abundance and creative drive." },
+                    { id: "zhiva", name: "ZHIVA", archetype: "Vital Force", preview: "Stop poisoning your physical avatar with processed toxic fast food." },
+                    { id: "kolyada", name: "KOLYADA", archetype: "New Era", preview: "The clock strikes midnight. Our mobile altars will protect you." },
+                    { id: "avsen", name: "AVSEN", archetype: "Garden Keeper", preview: "Observe the true, giant-caliber harvest of your potential." },
                     { id: "stribog", name: "STRIBOG", archetype: "Raging Wind", preview: "My winds sweep away roadblocks. We deliver your fuel blazingly fast." }
                 ]
             },
             ru: {
                 title: "Палата 12 Славянских Богов",
                 subtitle: "Найдите свой ментальный archetype силы, побеседуйте вживую голосом и заберите священный промокод для фудтраков Ladann.",
-                btnText: "ВКЛЮЧИТЬ ОРАКУЛ-ЧАТ",
+                btnText: "ПОГОВОРИТЬ С ОРАКУЛОМ",
                 gods: [
                     { id: "lada", name: "ЛАДА", archetype: "Мать / Гармония", preview: "Твой внутренний огонёк дрожит? Восстановим лад в твоем сердце." },
                     { id: "perun", name: "ПЕРУН", archetype: "Воин / Границы", preview: "Скиппер сковал меня, но я разбил цепи. Разбей страхи!" },
@@ -244,25 +219,37 @@
                     <div class="god-name">${god.name}</div>
                     <div class="archetype">${god.archetype}</div>
                     <div class="preview">"${god.preview}"</div>
-                    <a href="#" onclick="openChat(event)" class="btn">${langData.btnText}</a>
+                    <a href="#" onclick="openCozeChat(event)" class="btn">${langData.btnText}</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        function openChat(e) {
+        // Вызываем официальный чат-виджет Coze через SDK
+        let cozeClient = null;
+        function openCozeChat(e) {
             e.preventDefault();
-            const overlay = document.getElementById('coze-iframe-overlay');
-            const frame = document.getElementById('coze-frame');
-            
-            // Зашиваем официальную ПУБЛИЧНУЮ страницу вашего бота в магазине Coze Agent Store
-            frame.src = "https://coze.com";
-            overlay.style.display = 'block';
-        }
-
-        function closeChat() {
-            document.getElementById('coze-iframe-overlay').style.display = 'none';
-            document.getElementById('coze-frame').src = '';
+            if (!cozeClient) {
+                cozeClient = new CozeWebSDK.WebChatClient({
+                    config: {
+                        type: 'bot',
+                        bot_id: '7686437490198249525',
+                        isIframe: false,
+                    },
+                    auth: {
+                        type: 'token',
+                        token: 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo',
+                        onRefreshToken: async () => 'pat_XoA5leK9Rs6yBWdIschoHwPPYCpw6DZqNux9CbeEqvxaAaGk53B5mgkxmimadGTo'
+                    },
+                    userInfo: { id: 'traveler', nickname: 'Traveler' },
+                    ui: {
+                        base: { layout: 'mobile', lang: currentLang === 'ru' ? 'zh-CN' : 'en', zIndex: 99999 },
+                        footer: { isShow: false },
+                        chatBot: { title: 'The Pantheon of 12 Gods', uploadable: false }
+                    }
+                });
+            }
+            cozeClient.openChat();
         }
 
         function switchLang(lang) {
